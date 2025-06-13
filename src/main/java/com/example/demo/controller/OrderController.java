@@ -1,50 +1,43 @@
 package com.example.demo.controller;
 
+import com.example.demo.model.Order;
+import com.example.demo.service.OrderService;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.example.demo.model.Order;
-import com.example.demo.service.OrderTrackingService;
-
 import java.util.List;
-import java.util.UUID;
+import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/orders")
+@RequestMapping("/orders")
 public class OrderController {
-    private final OrderTrackingService orderTrackingService;
 
     @Autowired
-    public OrderController(OrderTrackingService orderTrackingService) {
-        this.orderTrackingService = orderTrackingService;
+    private OrderService orderService;
+
+    @GetMapping("/{userId}")
+    public List<Order> getAllOrdersByUserId(@PathVariable String userId) {
+        return orderService.getAllOrdersByUserId(userId);
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Order>> getOrdersForUser(@PathVariable String userId) {
-        List<Order> orders = orderTrackingService.getOrdersByUserId(userId);
-        return ResponseEntity.ok(orders);
+    @GetMapping("/{id}")
+    public Optional<Order> getOrderById(@PathVariable String id) {
+        return orderService.getOrderById(id);
     }
 
-    @GetMapping("/{orderId}")
-    public ResponseEntity<Order> getOrderDetails(
-            @RequestParam String userId, // Giả sử userId được truyền để xác thực
-            @PathVariable UUID orderId) {
-        Order order = orderTrackingService.getOrderDetails(userId, orderId);
-        if (order != null) {
-            return ResponseEntity.ok(order);
-        }
-        return ResponseEntity.notFound().build();
+    @PostMapping
+    public Order createOrder(@RequestBody Order order) {
+        return orderService.createOrder(order);
     }
 
-    @PutMapping("/{orderId}/status")
-    public ResponseEntity<Order> updateOrderStatus(
-            @PathVariable UUID orderId,
-            @RequestParam String newStatus) {
-        Order updatedOrder = orderTrackingService.updateOrderStatus(orderId, newStatus);
-        if (updatedOrder != null) {
-            return ResponseEntity.ok(updatedOrder);
-        }
-        return ResponseEntity.badRequest().build();
+    @PutMapping("/{id}/{status}")
+    public void updateOrderStatus(@PathVariable String id, @PathVariable String status) {
+        orderService.updateOrderStatus(id, status);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteOrder(@PathVariable String id) {
+        orderService.deleteOrder(id);
     }
 }

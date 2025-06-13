@@ -2,64 +2,86 @@ package com.example.demo.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+
+import org.springframework.data.mongodb.core.index.TextIndexed;
 
 import java.util.List;
 import java.util.Map;
 
 @Document(collection = "products")
-@org.springframework.data.elasticsearch.annotations.Document(indexName = "products") 
 public class Product {
     @Id
     private String id;
-    @Field(type = FieldType.Text, analyzer = "standard")
+    
+    @NotBlank(message = "Tên sản phẩm không được để trống")
+    @TextIndexed
     private String tenSanPham;
-    @Field(type = FieldType.Text)
+    
+    @TextIndexed
     private String moTa;
-    @Field(type = FieldType.Keyword) 
-    private String danhMuc;
-    private double gia;
-    private int soLuong; 
-    private String shopID;
-    private double diemDanhGia;
+    
+    @NotNull(message = "Giá không được để trống")
+    @Positive(message = "Giá phải lớn hơn 0")
+    private Double gia;
+    
+    @NotNull(message = "Số lượng không được để trống")
+    private Integer soLuong;
+    
     private List<String> hinhAnh;
-    private Map<String, List<String>> thuocTinh; 
-	public double getGia() {
-		return gia;
-	}
-	public void setGia(double gia) {
-		this.gia = gia;
-	}
-	public int getSoLuong() {
-		return soLuong;
-	}
-	public void setSoLuong(int soLuong) {
-		this.soLuong = soLuong;
-	}
-	public String getShopID() {
-		return shopID;
-	}
-	public void setShopID(String shopID) {
-		this.shopID = shopID;
-	}
-	public double getDiemDanhGia() {
-		return diemDanhGia;
-	}
-	public void setDiemDanhGia(double diemDanhGia) {
-		this.diemDanhGia = diemDanhGia;
-	}
-	public List<String> getHinhAnh() {
-		return hinhAnh;
-	}
-	public void setHinhAnh(List<String> hinhAnh) {
-		this.hinhAnh = hinhAnh;
-	}
-	public Map<String, List<String>> getThuocTinh() {
-		return thuocTinh;
-	}
-	public void setThuocTinh(Map<String, List<String>> thuocTinh) {
-		this.thuocTinh = thuocTinh;
-	}
+    
+    @TextIndexed
+    private String danhMuc;
+    
+    private String shopId;
+    private Double diemDanhGia;
+    private Map<String, Object> thuocTinh;
 
+    // Constructors
+    public Product() {}
+
+    public Product(String tenSanPham, String moTa, Double gia, Integer soLuong, 
+                  String danhMuc, String shopId) {
+        this.tenSanPham = tenSanPham;
+        this.moTa = moTa;
+        this.gia = gia;
+        this.soLuong = soLuong;
+        this.danhMuc = danhMuc;
+        this.shopId = shopId;
+        this.diemDanhGia = 0.0;
+    }
+
+    // Getters and Setters
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
+
+    public String getTenSanPham() { return tenSanPham; }
+    public void setTenSanPham(String tenSanPham) { this.tenSanPham = tenSanPham; }
+
+    public String getMoTa() { return moTa; }
+    public void setMoTa(String moTa) { this.moTa = moTa; }
+
+    public Double getGia() { return gia; }
+    public void setGia(Double gia) { this.gia = gia; }
+
+    public Integer getSoLuong() { return soLuong; }
+    public void setSoLuong(Integer soLuong) { this.soLuong = soLuong; }
+
+    public List<String> getHinhAnh() { return hinhAnh; }
+    public void setHinhAnh(List<String> hinhAnh) { this.hinhAnh = hinhAnh; }
+
+    public String getDanhMuc() { return danhMuc; }
+    public void setDanhMuc(String danhMuc) { this.danhMuc = danhMuc; }
+
+    public String getShopId() { return shopId; }
+    public void setShopId(String shopId) { this.shopId = shopId; }
+
+    public Double getDiemDanhGia() { return diemDanhGia; }
+    public void setDiemDanhGia(Double diemDanhGia) { this.diemDanhGia = diemDanhGia; }
+
+    public Map<String, Object> getThuocTinh() { return thuocTinh; }
+    public void setThuocTinh(Map<String, Object> thuocTinh) { this.thuocTinh = thuocTinh; }
 }

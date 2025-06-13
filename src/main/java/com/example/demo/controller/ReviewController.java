@@ -1,33 +1,38 @@
 package com.example.demo.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import com.example.demo.model.Review;
 import com.example.demo.service.ReviewService;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
+import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/reviews")
+@RequestMapping("/reviews")
 public class ReviewController {
-    private final ReviewService reviewService;
 
     @Autowired
-    public ReviewController(ReviewService reviewService) {
-        this.reviewService = reviewService;
+    private ReviewService reviewService;
+
+    @GetMapping("/{productId}")
+    public List<Review> getReviewsByProduct(@PathVariable String productId) {
+        return reviewService.getReviewsByProduct(productId);
+    }
+
+    @GetMapping("/{id}")
+    public Optional<Review> getReviewById(@PathVariable String id) {
+        return reviewService.getReviewById(id);
     }
 
     @PostMapping
-    public ResponseEntity<Review> submitReview(@RequestBody Review review) {
-        Review newReview = reviewService.submitReview(review);
-        return ResponseEntity.ok(newReview);
+    public Review saveReview(@RequestBody Review review) {
+        return reviewService.saveReview(review);
     }
 
-    @GetMapping("/product/{productId}")
-    public ResponseEntity<List<Review>> getReviewsByProduct(@PathVariable String productId) {
-        List<Review> reviews = reviewService.getReviewsByProductId(productId);
-        return ResponseEntity.ok(reviews);
+    @DeleteMapping("/{id}")
+    public void deleteReview(@PathVariable String id) {
+        reviewService.deleteReview(id);
     }
 }

@@ -6,10 +6,7 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
 import org.springframework.data.cassandra.repository.config.EnableCassandraRepositories;
 
-@SpringBootApplication
-@EnableMongoRepositories(basePackages = "com.example.demo.repository.mongodb")
-@EnableElasticsearchRepositories(basePackages = "com.example.demo.repository.elasticsearch")
-@EnableCassandraRepositories(basePackages = "com.example.demo.repository.cassandra")
+@SpringBootApplication(scanBasePackages = "com.example.demo")
 public class ShopeeApplication {
 
     public static void main(String[] args) {
