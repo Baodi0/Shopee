@@ -16,6 +16,6 @@ public class MongoConfig {
 
     @Bean
     public MongoTemplate mongoTemplate() {
-        return new MongoTemplate(mongoClient(), "shopee");
+        return new MongoTemplate(mongoClient(), "shopee_db");
     }
 }
