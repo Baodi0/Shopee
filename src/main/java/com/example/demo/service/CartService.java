@@ -9,6 +9,7 @@ import com.example.demo.model.Cart;
 import com.example.demo.model.Product;
 import com.example.demo.repository.CartRepository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -29,49 +30,52 @@ public class CartService {
     public Cart getCartByUserId(String userId) {
         String cacheKey = CART_CACHE_PREFIX + userId;
         Cart cachedCart = (Cart) redisTemplate.opsForValue().get(cacheKey);
+        String user_id = userId.replaceAll("[{}]", "");
 
         if (cachedCart != null) {
             return cachedCart;
         }
 
-        Optional<Cart> cart = cartRepository.findByUserId(userId);
-        if (cart.isPresent()) {
-            redisTemplate.opsForValue().set(cacheKey, cart.get(), 1, TimeUnit.HOURS);
-            return cart.get();
-        } else {
-            Cart newCart = new Cart(userId);
-            Cart savedCart = cartRepository.save(newCart);
-            redisTemplate.opsForValue().set(cacheKey, savedCart, 1, TimeUnit.HOURS);
-            return savedCart;
+        List<Cart> cartList = cartRepository.findAll();
+        Cart mergedCart = new Cart(user_id); 
+
+        for (Cart cart : cartList) {
+            if (cart.getUserId() != null && cart.getUserId().equals(user_id)) {
+                mergedCart.addSanPham(cart.getSanPham());
+            }
+           
+
         }
+
+        if (!mergedCart.getSanPham().isEmpty()) {
+            redisTemplate.opsForValue().set(cacheKey, mergedCart, 1, TimeUnit.HOURS);
+        }
+
+        return mergedCart;
     }
 
     public Cart addToCart(String userId, String productId, Integer quantity) {
-        Cart cart = getCartByUserId(userId);
-        Optional<Product> product = productService.getProductById(productId);
+    	productId = productId.replaceAll("[{}]", "");
+    	userId = userId.replaceAll("[{}]", "");
+    	
+    	
+    	Cart cart = getCartByUserId(userId);
+    	if (cart == null) {
+    	    cart = new Cart(userId);
+    	}      
 
-        if (!product.isPresent()) {
-            throw new RuntimeException("Sản phẩm không tồn tại");
-        }
 
-        Product prod = product.get();
-
-        if (prod.getSoLuong() < quantity) {
-            throw new RuntimeException("Không đủ hàng trong kho");
-        }
 
         boolean found = false;
         for (Cart.CartItem item : cart.getSanPham()) {
             if (item.getIdSanPham().equals(productId)) {
-                item.setSoLuong(item.getSoLuong() + quantity);
+                item.setSoLuong(quantity);
                 found = true;
                 break;
             }
         }
 
-        if (!found) {
-            cart.getSanPham().add(new Cart.CartItem(productId, quantity, prod.getGia()));
-        }
+
 
         cart.setNgayCapNhat(java.time.LocalDateTime.now());
         Cart updatedCart = cartRepository.save(cart);

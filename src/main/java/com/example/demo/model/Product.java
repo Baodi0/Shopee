@@ -1,5 +1,6 @@
 package com.example.demo.model;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -7,14 +8,23 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.index.TextIndexed;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-@Document(collection = "products")
-public class Product {
-    @Id
+@Document(collection = "SanPham")
+
+public class Product implements Serializable{
+
+	private static final long serialVersionUID = 1L;
+
+	@Autowired
+	private MongoTemplate mongoTemplate;
+	
+	@Id
     private String id;
     
     @NotBlank(message = "Tên sản phẩm không được để trống")
@@ -84,4 +94,12 @@ public class Product {
 
     public Map<String, Object> getThuocTinh() { return thuocTinh; }
     public void setThuocTinh(Map<String, Object> thuocTinh) { this.thuocTinh = thuocTinh; }
+
+	public MongoTemplate getMongoTemplate() {
+		return mongoTemplate;
+	}
+
+	public void setMongoTemplate(MongoTemplate mongoTemplate) {
+		this.mongoTemplate = mongoTemplate;
+	}
 }

@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.model.Cart;
+import com.example.demo.model.CartRequest;
 import com.example.demo.service.CartService;
 
 @RestController
@@ -19,9 +20,9 @@ public class CartController {
         return cartService.getCartByUserId(userId);
     }
 
-    @PostMapping("/{userId}/{productId}/{quantity}")
-    public Cart addToCart(@PathVariable String userId, @PathVariable String productId, @PathVariable Integer quantity) {
-        return cartService.addToCart(userId, productId, quantity);
+    @PostMapping("")
+    public Cart addToCart(@RequestBody CartRequest cartRequest) {
+        return cartService.addToCart(cartRequest.getUserId(), cartRequest.getProductId(), cartRequest.getQuantity());
     }
 
     @DeleteMapping("/{userId}/{productId}")
