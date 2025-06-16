@@ -27,32 +27,24 @@ public class ProductService {
         return productRepository.findAll();
     }
     
+    
     public Optional<Product> getProductById(String id) {
         String cacheKey = CACHE_KEY_PREFIX + id;
-        Product cachedProduct = (Product) redisTemplate.opsForValue().get(cacheKey);
         String product_id = id.replaceAll("[{}]", "");
-        
+
+        Product cachedProduct = (Product) redisTemplate.opsForValue().get(cacheKey);
         if (cachedProduct != null) {
             return Optional.of(cachedProduct);
         }
+
+        Optional<Product> optionalProduct = productRepository.findById(product_id);
         
-        // Nếu không có trong cache, lấy từ database
-        List<Product> productList = productRepository.findAll();
-
-        Optional<Product> optionalProduct = java.util.Optional.empty();
-        for (Product prod : productList) {
-            if (prod.getId().equals(product_id)) { 
-            	optionalProduct = Optional.of(prod);
-                redisTemplate.opsForValue().set(cacheKey, optionalProduct.get(), 1, TimeUnit.HOURS);
-            }
-
-        }
+        optionalProduct.ifPresent(product -> 
+            redisTemplate.opsForValue().set(cacheKey, product, 1, TimeUnit.HOURS)
+        );
 
         return optionalProduct;
     }
-    
-    
-    
 
     
     @SuppressWarnings("unchecked")
@@ -84,25 +76,10 @@ public class ProductService {
         String query = "{" + tukhoa + danhMuc + " 'gia': { $gte: " + minPrice + ", $lte: " + maxPrice + " } }";
         List<Product> result = productRepository.searchProducts(query);      
         
-        // Lưu vào cache
         redisTemplate.opsForValue().set(searchCacheKey, result, 5, TimeUnit.MINUTES);
         
         return (List<Product>) result;
     }
     
-    public List<Product> getTopRatedProducts() {
-        String cacheKey = "top_rated_products";
-        @SuppressWarnings("unchecked")
-		List<Product> cachedProducts = (List<Product>) redisTemplate.opsForValue().get(cacheKey);
-        
-        if (cachedProducts != null) {
-            return cachedProducts;
-        }
-        
-        List<Product> products = productRepository.findTop10ByOrderByDiemDanhGiaDesc();
-        redisTemplate.opsForValue().set(cacheKey, products, 30, TimeUnit.MINUTES);
-        
-        return products;
-    }
     
 }

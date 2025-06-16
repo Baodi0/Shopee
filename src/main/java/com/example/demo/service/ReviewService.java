@@ -32,9 +32,9 @@ public class ReviewService {
         @SuppressWarnings("unchecked")
 		List<Review> cachedReviews = (List<Review>) redisTemplate.opsForValue().get(cacheKey);
 
-        //if (cachedReviews != null) {
-        //    return cachedReviews;
-        //}
+        if (cachedReviews != null) {
+            return cachedReviews;
+        }
         
 
         List<Review> reviews = reviewRepository.findReviewsByProductId(productId);
@@ -45,7 +45,6 @@ public class ReviewService {
 
 
     public void saveReview(ReviewRequest reviewRequest) {
-        System.out.println(reviewRequest.get_id());
 
         Review review = new Review();
         review.setId(reviewRequest.get_id()); 

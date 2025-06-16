@@ -25,26 +25,27 @@ public class CartService {
     private static final String CART_CACHE_PREFIX = "cart:";
 
     @SuppressWarnings("null")
-	public Cart getCartByUserId(String userId) {
+    public Cart getCartByUserId(String userId) {
         String cacheKey = CART_CACHE_PREFIX + userId;
-		Cart cachedCart = (Cart) redisTemplate.opsForValue().get(cacheKey);
         String user_id = userId.replaceAll("[{}]", "");
 
+        Cart cachedCart = (Cart) redisTemplate.opsForValue().get(cacheKey);
         if (cachedCart != null) {
             return cachedCart;
         }
 
-        List<Cart> cartList = cartRepository.findAll();
-
-        for (Cart cart : cartList) {
-            if (cart.getUserId() != null && cart.getUserId().equals(user_id)) {
-            	redisTemplate.opsForValue().set(cacheKey, cart, 1, TimeUnit.HOURS);
-                return cart;
-            }
+        
+        List<Cart> carts = cartRepository.findByUserId(user_id);
+        if (!carts.isEmpty()) {
+            Cart cart = carts.get(0);
+            redisTemplate.opsForValue().set(cacheKey, cart, 1, TimeUnit.HOURS);
+            return cart;
+            
         }
-        return null;
 
+        return null;
     }
+
 
     public void addToCart(String userId, String productId, Integer quantity) {
         productId = productId.replaceAll("[{}]", "");

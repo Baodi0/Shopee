@@ -5,10 +5,10 @@ import org.springframework.stereotype.Repository;
 
 import com.example.demo.model.Cart;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface CartRepository extends MongoRepository<Cart, String> {
-    Optional<Cart> findByUserId(String userId);
-    void deleteByUserId(String userId);
+    List<Cart> findByUserId(String userId);
 }

@@ -2,6 +2,7 @@ package com.example.demo.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -13,7 +14,8 @@ public class Cart implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     private String id;
-    private String userID;
+    @Field("userID")
+    private String userId;
     private LocalDateTime ngayCapNhat;
     private List<CartItem> sanPham;
 
@@ -23,7 +25,7 @@ public class Cart implements Serializable {
     }
 
     public Cart(String userId) {
-        this.userID = userId;
+        this.userId = userId;
         this.sanPham = new ArrayList<>();
         this.ngayCapNhat = LocalDateTime.now();
     }
@@ -60,8 +62,8 @@ public class Cart implements Serializable {
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 
-    public String getUserId() { return userID; }
-    public void setUserId(String userId) { this.userID = userId; }
+    public String getUserId() { return userId; }
+    public void setUserId(String userId) { this.userId = userId; }
 
     public LocalDateTime getNgayCapNhat() { return ngayCapNhat; }
     public void setNgayCapNhat(LocalDateTime ngayCapNhat) { this.ngayCapNhat = ngayCapNhat; }
