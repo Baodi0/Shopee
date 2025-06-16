@@ -23,11 +23,12 @@ public class ProductController {
     public List<Product> getAllProducts() {
         return productService.getAllProducts();
     }
-
+    
     @GetMapping("/{id}")
     public Optional<Product> getProductById(@PathVariable String id) {
         return productService.getProductById(id);
     }
+    
     @GetMapping("/search")
     public ResponseEntity<List<Product>> searchProducts(
             @RequestParam(required = false) String keyword,

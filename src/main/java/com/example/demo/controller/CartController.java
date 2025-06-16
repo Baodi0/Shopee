@@ -21,17 +21,13 @@ public class CartController {
     }
 
     @PostMapping("")
-    public Cart addToCart(@RequestBody CartRequest cartRequest) {
-        return cartService.addToCart(cartRequest.getUserId(), cartRequest.getProductId(), cartRequest.getQuantity());
+    public void addToCart(@RequestBody CartRequest cartRequest) {
+        cartService.addToCart(cartRequest.getUserId(), cartRequest.getProductId(), cartRequest.getQuantity());
     }
 
-    @DeleteMapping("/{userId}/{productId}")
-    public void removeFromCart(@PathVariable String userId, @PathVariable String productId) {
-        cartService.removeFromCart(userId, productId);
+    @DeleteMapping("")
+    public void removeFromCart(@RequestBody CartRequest cartRequest) {
+        cartService.removeFromCart(cartRequest.getUserId(), cartRequest.getProductId());
     }
 
-    @DeleteMapping("/{userId}")
-    public void clearCart(@PathVariable String userId) {
-        cartService.clearCart(userId);
-    }
 }

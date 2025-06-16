@@ -24,7 +24,8 @@ public class OrderService {
 
     public List<Order> getAllOrdersByUserId(String userId) {
         String cacheKey = ORDER_CACHE_PREFIX + userId;
-        List<Order> cachedOrders = (List<Order>) redisTemplate.opsForValue().get(cacheKey);
+        @SuppressWarnings("unchecked")
+		List<Order> cachedOrders = (List<Order>) redisTemplate.opsForValue().get(cacheKey);
 
         if (cachedOrders != null) {
             return cachedOrders;
@@ -35,6 +36,7 @@ public class OrderService {
         return orders;
     }
 
+    
     public Optional<Order> getOrderById(String id) {
         String cacheKey = ORDER_CACHE_PREFIX + id;
         Order cachedOrder = (Order) redisTemplate.opsForValue().get(cacheKey);

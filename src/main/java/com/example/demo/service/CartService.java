@@ -20,16 +20,14 @@ public class CartService {
     private CartRepository cartRepository;
 
     @Autowired
-    private ProductService productService;
-
-    @Autowired
     private RedisTemplate<String, Object> redisTemplate;
 
     private static final String CART_CACHE_PREFIX = "cart:";
 
-    public Cart getCartByUserId(String userId) {
+    @SuppressWarnings("null")
+	public Cart getCartByUserId(String userId) {
         String cacheKey = CART_CACHE_PREFIX + userId;
-        Cart cachedCart = (Cart) redisTemplate.opsForValue().get(cacheKey);
+		Cart cachedCart = (Cart) redisTemplate.opsForValue().get(cacheKey);
         String user_id = userId.replaceAll("[{}]", "");
 
         if (cachedCart != null) {
@@ -37,36 +35,28 @@ public class CartService {
         }
 
         List<Cart> cartList = cartRepository.findAll();
-        Cart mergedCart = new Cart(user_id); 
 
         for (Cart cart : cartList) {
             if (cart.getUserId() != null && cart.getUserId().equals(user_id)) {
-                mergedCart.addSanPham(cart.getSanPham());
+            	redisTemplate.opsForValue().set(cacheKey, cart, 1, TimeUnit.HOURS);
+                return cart;
             }
-           
-
         }
+        return null;
 
-        if (!mergedCart.getSanPham().isEmpty()) {
-            redisTemplate.opsForValue().set(cacheKey, mergedCart, 1, TimeUnit.HOURS);
-        }
-
-        return mergedCart;
     }
 
-    public Cart addToCart(String userId, String productId, Integer quantity) {
-    	productId = productId.replaceAll("[{}]", "");
-    	userId = userId.replaceAll("[{}]", "");
-    	
-    	
-    	Cart cart = getCartByUserId(userId);
-    	if (cart == null) {
-    	    cart = new Cart(userId);
-    	}      
+    public void addToCart(String userId, String productId, Integer quantity) {
+        productId = productId.replaceAll("[{}]", "");
+        userId = userId.replaceAll("[{}]", "");
 
-
+        Cart cart = getCartByUserId(userId);
+        if (cart == null) {
+            cart = new Cart(userId);
+        }
 
         boolean found = false;
+
         for (Cart.CartItem item : cart.getSanPham()) {
             if (item.getIdSanPham().equals(productId)) {
                 item.setSoLuong(quantity);
@@ -75,14 +65,19 @@ public class CartService {
             }
         }
 
-
+        if (!found) {
+            Cart.CartItem newItem = new Cart.CartItem();
+            newItem.setIdSanPham(productId);
+            newItem.setSoLuong(quantity);
+            cart.getSanPham().add(newItem);
+        }
 
         cart.setNgayCapNhat(java.time.LocalDateTime.now());
         Cart updatedCart = cartRepository.save(cart);
 
         redisTemplate.opsForValue().set(CART_CACHE_PREFIX + userId, updatedCart, 1, TimeUnit.HOURS);
-        return updatedCart;
     }
+
 
     public void removeFromCart(String userId, String productId) {
         Cart cart = getCartByUserId(userId);
@@ -92,11 +87,4 @@ public class CartService {
         redisTemplate.opsForValue().set(CART_CACHE_PREFIX + userId, cart, 1, TimeUnit.HOURS);
     }
 
-    public void clearCart(String userId) {
-        Cart cart = getCartByUserId(userId);
-        cart.getSanPham().clear();
-        cart.setNgayCapNhat(java.time.LocalDateTime.now());
-        cartRepository.save(cart);
-        redisTemplate.opsForValue().set(CART_CACHE_PREFIX + userId, cart, 1, TimeUnit.HOURS);
-    }
 }

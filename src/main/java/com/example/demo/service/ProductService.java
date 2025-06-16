@@ -28,13 +28,13 @@ public class ProductService {
     }
     
     public Optional<Product> getProductById(String id) {
-        // Kiểm tra cache trước
         String cacheKey = CACHE_KEY_PREFIX + id;
         Product cachedProduct = (Product) redisTemplate.opsForValue().get(cacheKey);
         String product_id = id.replaceAll("[{}]", "");
-        //if (cachedProduct != null) {
-        //    return Optional.of(cachedProduct);
-        //}
+        
+        if (cachedProduct != null) {
+            return Optional.of(cachedProduct);
+        }
         
         // Nếu không có trong cache, lấy từ database
         List<Product> productList = productRepository.findAll();
@@ -52,23 +52,25 @@ public class ProductService {
     }
     
     
+    
+
+    
     @SuppressWarnings("unchecked")
 	public List<Product> searchProducts(String keyword, String category, 
                                       Double minPrice, Double maxPrice, 
                                       int page, int size, String sortBy) {
-        // Tạo cache key cho tìm kiếm
-        String searchCacheKey = SEARCH_CACHE_PREFIX + keyword + ":" + category + ":" + 
+
+    	String searchCacheKey = SEARCH_CACHE_PREFIX + keyword + ":" + category + ":" + 
                                minPrice + ":" + maxPrice + ":" + page + ":" + size + ":" + sortBy;
         
     	System.out.println(searchCacheKey);
 
         // Kiểm tra cache
-        //List<Product> cachedResult = (List<Product>) redisTemplate.opsForValue().get(searchCacheKey);
-        //if (cachedResult != null) {
-        //    return cachedResult;
-        //}
+        List<Product> cachedResult = (List<Product>) redisTemplate.opsForValue().get(searchCacheKey);
+        if (cachedResult != null) {
+            return cachedResult;
+        }
         
-        // Xử lý giá trị mặc định
         if (minPrice == null) minPrice = 0.0;
         if (maxPrice == null) maxPrice = 1000000000.0;
         
@@ -78,8 +80,8 @@ public class ProductService {
     	String danhMuc = "";
         if(category != null)
         	danhMuc = "'danhMuc': '" + category + "' ,";
-        // Thực hiện tìm kiếm
-    	String query = "{" + tukhoa + danhMuc + " 'gia': { $gte: " + minPrice + ", $lte: " + maxPrice + " } }";
+
+        String query = "{" + tukhoa + danhMuc + " 'gia': { $gte: " + minPrice + ", $lte: " + maxPrice + " } }";
         List<Product> result = productRepository.searchProducts(query);      
         
         // Lưu vào cache

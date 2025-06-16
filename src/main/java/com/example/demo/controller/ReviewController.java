@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.Review;
+import com.example.demo.model.ReviewRequest;
 import com.example.demo.service.ReviewService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,18 +22,13 @@ public class ReviewController {
         return reviewService.getReviewsByProduct(productId);
     }
 
-    @GetMapping("/{id}")
-    public Optional<Review> getReviewById(@PathVariable String id) {
-        return reviewService.getReviewById(id);
-    }
-
     @PostMapping
-    public Review saveReview(@RequestBody Review review) {
-        return reviewService.saveReview(review);
+    public void saveReview(@RequestBody ReviewRequest reviewRequest) {
+        reviewService.saveReview(reviewRequest);
     }
 
-    @DeleteMapping("/{id}")
-    public void deleteReview(@PathVariable String id) {
-        reviewService.deleteReview(id);
+    @DeleteMapping
+    public void deleteReview(@RequestBody ReviewRequest reviewRequest) {
+        reviewService.deleteReview(reviewRequest);
     }
 }
